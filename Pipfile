@@ -22,7 +22,7 @@ email-validator = "*"
 requests = "*"
 celery = "*"
 passlib = {extras = ["bcrypt"],version = "*"}
-tenacity = "афы*"
+tenacity = "*"
 pydantic = "*"
 emails = "*"
 raven = "*"

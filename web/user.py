@@ -11,21 +11,22 @@ from dao.user import User, UserCreate
 router = APIRouter()
 
 
-@router.post("/users/", response_model=User)
-def create_user(
+@router.post("/auth/register/", response_model=User)
+def register(
         *,
         db: Session = Depends(get_db),
         user_in: UserCreate
 ):
     """
-    Create new user.
+    Register User
     """
     user = user_service.find_by_email(db, user_email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this username already exists in the system.",
+            detail="The user already exists in the system.",
         )
-    user = crud.user.create(db, user_in=user_in)
+    user = user_service.create(db, user_in=user_in)
 
     return user
+
