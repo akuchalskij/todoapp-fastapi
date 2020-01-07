@@ -2,11 +2,14 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.security import OAuth2PasswordRequestForm
+
 from sqlalchemy.orm import Session
 
 from utils.db import get_db
 from service import user as user_service
-from dao.user import User, UserCreate
+from dto.user import User, Credentials
+from security import authenticate, jwt
 
 router = APIRouter()
 
@@ -15,7 +18,7 @@ router = APIRouter()
 def register(
         *,
         db: Session = Depends(get_db),
-        user_in: UserCreate
+        user_in: Credentials
 ):
     """
     Register User
@@ -30,3 +33,25 @@ def register(
 
     return user
 
+
+@router.post("/auth/login/", response_model=jwt.Token)
+def login(
+        *,
+        db: Session = Depends(get_db),
+        form_data: OAuth2PasswordRequestForm = Depends(),
+):
+    """
+    Login User
+    """
+    user = authenticate.authenticate(db, email=form_data.username, password=form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="Incorrect email or password",
+        )
+
+    return {
+        "access_token": jwt.create_access_token(
+            data={"user_id": user.id}
+        )
+    }

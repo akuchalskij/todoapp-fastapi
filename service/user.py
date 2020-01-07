@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from entity.user import User
-from dao.user import UserCreate
+from dto.user import Credentials
 from utils.security import get_password_hash
 
 
@@ -20,7 +20,7 @@ def find_all(db_session: Session, *, skip=0, limit=100) -> List[Optional[User]]:
     return db_session.query(User).offset(skip).limit(limit).all()
 
 
-def create(db_session: Session, *, user_in: UserCreate) -> User:
+def create(db_session: Session, *, user_in: Credentials) -> User:
     user = User(
         email=user_in.email,
         password=get_password_hash(user_in.password),

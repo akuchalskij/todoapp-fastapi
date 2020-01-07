@@ -11,6 +11,6 @@ class User(UserBase):
     id: int = None
 
 
-class UserCreate(User):
+class Credentials(User):
     email: str
     password: str
