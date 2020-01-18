@@ -22,3 +22,7 @@ def create_access_token(*, data: dict, expires_delta: timedelta = None):
 
 class Token(BaseModel):
     access_token: str
+
+
+class TokenPayload(BaseModel):
+    user_id: int

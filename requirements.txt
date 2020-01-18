@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pyjwt
+python-multipart
+requests
+celery
+passlib
+tenacity
+pydantic
+emails
+raven
+gunicorn
+psycopg2-binary
+alembic
+sqlalchemy
+bcrypt
