@@ -1,13 +1,13 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-from service import task as task_service
-from utils.db import get_db
 from security.authenticate import get_current_user
-from entity.user import User
+from sqlalchemy.orm import Session
+from utils.db import get_db
+
 from dto.task import Task, TaskCreate, TaskUpdate
+from entity.user import User
+from service import task as task_service
 
 router = APIRouter()
 
