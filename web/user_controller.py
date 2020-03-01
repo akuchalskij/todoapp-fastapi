@@ -1,58 +1,47 @@
-from typing import List
-
-from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
+from fastapi import Depends, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
-from sqlalchemy.orm import Session
-
-from utils.db import get_db
-from service import user as user_service
 from dto.user import User, Credentials
-from security.authenticate import authenticate, get_current_user
-from security import jwt
+from entity import User as UserEntity
+from repository import UserRepository
+from security import Token, create_access_token
+from service import UserService
+from web import BaseController
 
 router = APIRouter()
 
 
-@router.post("/register/", response_model=User)
-def register(
-        *,
-        db: Session = Depends(get_db),
-        user_in: Credentials
-):
-    """
-    Register User
-    """
-    user = user_service.find_by_email(db, user_email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user already exists in the system.",
-        )
-    user = user_service.create(db, user_in=user_in)
+class UserController(BaseController):
+    def __init__(self, service: UserService, repository: UserRepository):
+        self.service = service
+        self.repository = repository
 
-    return user
-
-
-@router.post("/login/", response_model=jwt.Token)
-def login(
-        *,
-        db: Session = Depends(get_db),
-        form_data: OAuth2PasswordRequestForm = Depends(),
-):
-    """
-    Login User
-    """
-    user = authenticate(db, email=form_data.username, password=form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=400,
-            detail="Incorrect email or password",
+    @router.post("/register/", response_model=User)
+    def register(self, request: Credentials) -> User:
+        """
+        Register User
+        """
+        user = self.repository.find_by(
+            entity_class=UserEntity, entity_param=UserEntity.email, variable=request.email
         )
 
-    return {
-        "access_token": jwt.create_access_token(
-            data={"user_id": user.id}
-        )
-    }
+        if user:
+            raise HTTPException(status_code=400, detail="The user already exists in the system.")
+
+        user = self.service.create(user_in=request)
+
+        return user
+
+    @router.post("/login/", response_model=Token)
+    def login(self, form_data: OAuth2PasswordRequestForm = Depends()):
+        """
+        Login User
+        """
+        user = self.service.authenticate(email=form_data.username, password=form_data.password)
+
+        if not user:
+            raise HTTPException(status_code=400, detail="Incorrect email or password")
+
+        return {
+            "access_token": create_access_token(data={"user_id": user.id})
+        }

@@ -1,31 +1,57 @@
-from typing import List, Optional
+from typing import Optional
 
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
+import jwt
+from fastapi import HTTPException, Security
+from fastapi.security import OAuth2PasswordBearer
+from jwt import PyJWTError
+from passlib.context import CryptContext
+from starlette.status import HTTP_403_FORBIDDEN
 
-from entity.user import User
+from config import settings
 from dto.user import Credentials
-from utils.security import get_password_hash
+from entity.user import User
+from repository import UserRepository
+from security.jwt import ALGORITHM, TokenPayload
+
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/login/")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def find_by_id(db_session: Session, *, user_id: int) -> Optional[User]:
-    return db_session.query(User).filter(User.id == user_id).first()
+class UserService:
+    def __init__(self, repository: UserRepository):
+        self.repository = repository
 
+    def create(self, *, user_in: Credentials) -> User:
+        user = User(
+            email=user_in.email,
+            password=pwd_context.hash(user_in.password),
+        )
 
-def find_by_email(db_session: Session, *, user_email: str) -> Optional[User]:
-    return db_session.query(User).filter(User.email == user_email).first()
+        return self.repository.save(user)
 
+    def authenticate(self, *, email: str, password: str) -> Optional[User]:
+        user = self.repository.find_by(entity_class=User, entity_param=User.email, variable=email)
 
-def find_all(db_session: Session, *, skip=0, limit=100) -> List[Optional[User]]:
-    return db_session.query(User).offset(skip).limit(limit).all()
+        if not user:
+            return None
 
+        if not pwd_context.verify(password, user.password):
+            return None
 
-def create(db_session: Session, *, user_in: Credentials) -> User:
-    user = User(
-        email=user_in.email,
-        password=get_password_hash(user_in.password),
-    )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
-    return user
+        return user
+
+    def get_current_user(self, token: str = Security(reusable_oauth2)):
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+            token_data = TokenPayload(**payload)
+        except PyJWTError:
+            raise HTTPException(
+                status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"
+            )
+
+        user = self.repository.find_by(entity_class=User, entity_param=User.id, variable=token_data.user_id)
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return user
