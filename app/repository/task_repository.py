@@ -1,7 +1,7 @@
 from typing import Optional, List
 
-from entity.task import Task
-from repository import BaseRepository
+from app.entity import Task
+from app.repository import BaseRepository
 
 
 class TaskRepository(BaseRepository):

@@ -1,31 +1,23 @@
 from pydantic import BaseModel
 
 
-class TaskBase(BaseModel):
+class TaskDTOBase(BaseModel):
     title: str = None
     description: str = None
 
 
-class TaskCreate(TaskBase):
+class TaskCreate(TaskDTOBase):
     title: str
 
 
-class TaskUpdate(TaskBase):
+class TaskUpdate(TaskDTOBase):
     pass
 
 
-class TaskInDBBase(TaskBase):
+class TaskDTO(TaskDTOBase):
     id: int
     title: str
     owner_id: int
 
     class Config:
         orm_mode = True
-
-
-class Task(TaskInDBBase):
-    pass
-
-
-class TaskInDB(TaskInDBBase):
-    pass

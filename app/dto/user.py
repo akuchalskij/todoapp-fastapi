@@ -1,19 +1,19 @@
-from typing import Optional, Dict, Any
+from typing import Optional
 
 from pydantic import BaseModel
 
 
-class UserBase(BaseModel):
+class UserDTOBase(BaseModel):
     email: Optional[str] = None
 
     class Config:
         orm_mode = True
 
 
-class User(UserBase):
+class UserDTO(UserDTOBase):
     id: int = None
 
 
-class Credentials(User):
+class Credentials(UserDTO):
     email: str
     password: str

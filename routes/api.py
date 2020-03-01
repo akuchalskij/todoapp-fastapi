@@ -1,7 +1,10 @@
 from fastapi import APIRouter
 
-from web import user_controller,  task_controller
+from app.web import (
+    user_controller as users,
+    task_controller as tasks
+)
 
 api_router = APIRouter()
-api_router.include_router(user_controller.router, prefix="/users", tags=["auth"])
-api_router.include_router(task_controller.router, prefix="/tasks", tags=["tasks"])
+api_router.include_router(users.router, prefix="/users", tags=["auth"])
+api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])

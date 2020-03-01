@@ -1,6 +1,3 @@
-from typing import List
-
-import sqlalchemy
 from fastapi import FastAPI
 from starlette.requests import Request
 
@@ -17,4 +14,5 @@ async def db_session_middleware(request: Request, call_next):
     request.state.db = db.Session()
     response = await call_next(request)
     request.state.db.close()
+
     return response

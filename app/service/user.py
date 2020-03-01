@@ -8,10 +8,10 @@ from passlib.context import CryptContext
 from starlette.status import HTTP_403_FORBIDDEN
 
 from config import settings
-from dto.user import Credentials
-from entity.user import User
-from repository import UserRepository
-from security.jwt import ALGORITHM, TokenPayload
+from app.dto import Credentials
+from app.entity import User
+from app.repository import UserRepository
+from app.security import ALGORITHM, TokenPayload
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/login/")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,10 +21,10 @@ class UserService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
 
-    def create(self, *, user_in: Credentials) -> User:
+    def create(self, *, request: Credentials) -> User:
         user = User(
-            email=user_in.email,
-            password=pwd_context.hash(user_in.password),
+            email=request.email,
+            password=pwd_context.hash(request.password),
         )
 
         return self.repository.save(user)

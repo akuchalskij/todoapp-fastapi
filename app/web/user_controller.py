@@ -1,12 +1,12 @@
 from fastapi import Depends, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
-from dto.user import User, Credentials
-from entity import User as UserEntity
-from repository import UserRepository
-from security import Token, create_access_token
-from service import UserService
-from web import BaseController
+from app.dto import UserDTO, Credentials
+from app.entity import User
+from app.repository import UserRepository
+from app.security import Token, create_access_token
+from app.service import UserService
+from app.web import BaseController
 
 router = APIRouter()
 
@@ -16,19 +16,17 @@ class UserController(BaseController):
         self.service = service
         self.repository = repository
 
-    @router.post("/register/", response_model=User)
-    def register(self, request: Credentials) -> User:
+    @router.post("/register/", response_model=UserDTO)
+    def register(self, request: Credentials):
         """
         Register User
         """
-        user = self.repository.find_by(
-            entity_class=UserEntity, entity_param=UserEntity.email, variable=request.email
-        )
+        user = self.repository.find_by(entity_class=User, entity_param=User.email, variable=request.email)
 
         if user:
             raise HTTPException(status_code=400, detail="The user already exists in the system.")
 
-        user = self.service.create(user_in=request)
+        user = self.service.create(request=request)
 
         return user
 
