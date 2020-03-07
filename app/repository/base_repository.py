@@ -1,25 +1,30 @@
 from typing import Optional, List, Any
 
-from config.db import Session
+import attr
+from injector import inject
+
+from config.db import Database
 
 
-class BaseRepository:
-    def __init__(self, db: Session):
-        self.db = db
+@inject
+@attr.dataclass
+@attr.s(auto_attribs=True)
+class BaseRepository(object):
+    _db: Database
 
     def find_by(self, *, entity_class: Any, entity_param: Any, variable: Any) -> Optional[Any]:
-        return self.db.query(entity_class).filter(entity_param == variable).first()
+        return self._db.session.query(entity_class).filter(entity_param == variable).first()
 
     def find_all(self, *, entity_class: Any, skip=0, limit=100) -> List[Optional[Any]]:
-        return self.db.query(entity_class).offset(skip).limit(limit).all()
+        return self._db.session.query(entity_class).offset(skip).limit(limit).all()
 
     def save(self, entity: Any) -> Any:
-        self.db.add(entity)
-        self.db.commit()
-        self.db.refresh(entity)
+        self._db.session.add(entity)
+        self._db.session.commit()
+        self._db.session.refresh(entity)
 
         return entity
 
     def delete(self, entity: Any):
-        self.db.delete(entity)
-        self.db.commit()
+        self._db.session.delete(entity)
+        self._db.session.commit()

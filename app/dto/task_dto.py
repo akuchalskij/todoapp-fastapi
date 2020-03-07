@@ -6,18 +6,17 @@ class TaskDTOBase(BaseModel):
     description: str = None
 
 
+class TaskDTO(TaskDTOBase):
+    id: int
+    title: str
+
+    class Config:
+        orm_mode = True
+
+
 class TaskCreate(TaskDTOBase):
     title: str
 
 
 class TaskUpdate(TaskDTOBase):
     pass
-
-
-class TaskDTO(TaskDTOBase):
-    id: int
-    title: str
-    owner_id: int
-
-    class Config:
-        orm_mode = True

@@ -1,3 +1,4 @@
+attrs
 fastapi
 uvicorn
 pyjwt
@@ -14,3 +15,4 @@ psycopg2-binary
 alembic
 sqlalchemy
 bcrypt
+injector

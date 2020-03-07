@@ -1,2 +1,1 @@
-from .task import TaskService
-from .user import UserService
+from .task_service import TaskService

@@ -1,2 +1,1 @@
-from .user import UserDTO, Credentials
-from .task import TaskDTO, TaskCreate, TaskUpdate
+from .task_dto import TaskDTO, TaskCreate, TaskUpdate
