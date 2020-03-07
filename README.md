@@ -8,3 +8,5 @@ Install:
 5. npm run serve
 
 open browser http://localhost:8080/tasks
+
+![Image description](todoapp.jpg)
